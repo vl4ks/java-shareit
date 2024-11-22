@@ -1,4 +1,4 @@
-package ru.practicum.shareit.request.dto;
+package ru.practicum.shareit.request.model;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -17,7 +17,7 @@ import java.time.LocalDateTime;
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class ItemRequestDto {
+public class ItemRequest {
     private Long id;
     @NotBlank(message = "Описание запроса не должно быть пустым")
     private String description;

@@ -1,4 +1,4 @@
-package ru.practicum.shareit.booking.dto;
+package ru.practicum.shareit.booking.model;
 
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotNull;
@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-public class BookingDto {
+public class Booking {
     private Long id;
     @NotNull(message = "Дата начала бронирования обязательна")
     @Future(message = "Дата начала бронирования должна быть в будущем")
