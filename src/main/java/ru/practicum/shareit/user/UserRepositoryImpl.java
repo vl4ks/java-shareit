@@ -2,23 +2,19 @@ package ru.practicum.shareit.user;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 import ru.practicum.shareit.exception.ConflictException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
-import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.model.User;
 
 import java.util.*;
 
 @Slf4j
 @Repository
-@Component("userRepositoryImpl")
 @RequiredArgsConstructor
 public class UserRepositoryImpl implements UserRepository {
     private final Map<Long, User> userStorage = new HashMap<>();
-    private final UserMapper userMapper;
     private long idGenerator = 1;
 
     @Override
@@ -29,33 +25,30 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public User getUserById(Long id) {
-        log.info("Получение пользователя по id=: {}", id);
-        if (userStorage.containsKey(id)) {
-            return userStorage.get(id);
-        }
-        throw new NotFoundException("Пользователь с id = " + id + " не найден");
+        log.info("Получение пользователя по id = {}", id);
+        validateUserExists(id);
+        return userStorage.get(id);
     }
 
     @Override
-    public User createUser(UserDto user) {
+    public User createUser(User user) {
         log.info("Создание нового пользователя: {}", user);
-        User newUser = userMapper.toUser(user);
-        validateUserForCreation(newUser);
+        validateUserForCreation(user);
 
         boolean emailExists = userStorage.values().stream()
                 .anyMatch(existingUser ->
                         existingUser.getEmail() != null
-                                && existingUser.getEmail().equalsIgnoreCase(newUser.getEmail()));
+                                && existingUser.getEmail().equalsIgnoreCase(user.getEmail()));
         if (emailExists) {
-            log.error("Ошибка при создании пользователя: email '{}' уже существует", newUser.getEmail());
+            log.error("Ошибка при создании пользователя: email '{}' уже существует", user.getEmail());
             throw new ConflictException("Пользователь с таким email уже существует");
         }
 
-        newUser.setId(idGenerator++);
-        userStorage.put(newUser.getId(), newUser);
+        user.setId(idGenerator++);
+        userStorage.put(user.getId(), user);
 
-        log.info("Пользователь с id = {} успешно создан", newUser.getId());
-        return newUser;
+        log.info("Пользователь с id = {} успешно создан", user.getId());
+        return user;
     }
 
 
@@ -81,10 +74,8 @@ public class UserRepositoryImpl implements UserRepository {
 
     @Override
     public void deleteUser(Long id) {
-        log.info("Удаление пользователя с id= {}: ", id);
-        if (!userStorage.containsKey(id)) {
-            throw new NotFoundException("Пользователь с id = " + id + " не найден");
-        }
+        log.info("Удаление пользователя с id = {} ", id);
+        validateUserExists(id);
         userStorage.remove(id);
         log.info("Пользователь с id = {} успешно удален", id);
     }

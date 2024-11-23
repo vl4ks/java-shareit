@@ -1,16 +1,12 @@
 package ru.practicum.shareit.item.dto;
 
-import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * TODO Sprint add-controllers.
- */
-@Valid
+
 @Data
 @Builder(toBuilder = true)
 @NoArgsConstructor
@@ -23,5 +19,4 @@ public class ItemDto {
     private String description;
     @NotBlank(message = "Доступность не может быть пустой")
     private String available;
-    private Long ownerId;
 }

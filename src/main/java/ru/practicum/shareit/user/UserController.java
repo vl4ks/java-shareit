@@ -8,9 +8,7 @@ import ru.practicum.shareit.user.dto.UserDto;
 
 import java.util.List;
 
-/**
- * TODO Sprint add-controllers.
- */
+
 @RestController("userController")
 @Slf4j
 @RequiredArgsConstructor
@@ -25,8 +23,8 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public UserDto getUserById(@PathVariable("id") Long id) {
-        log.debug("Получение пользователя по id=: {}", id);
+    public UserDto getUserById(@PathVariable Long id) {
+        log.debug("Получение пользователя по id =  {}", id);
         return userService.getUserById(id);
     }
 
@@ -45,7 +43,7 @@ public class UserController {
 
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
-        log.debug("Удаление пользователя с id= {}: ", id);
+        log.debug("Удаление пользователя с id = {}: ", id);
         userService.deleteUser(id);
     }
 }
