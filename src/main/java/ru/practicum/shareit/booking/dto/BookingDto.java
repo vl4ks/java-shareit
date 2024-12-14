@@ -24,10 +24,11 @@ public class BookingDto {
     @NotNull(message = "Дата окончания бронирования обязательна")
     @Future(message = "Дата окончания бронирования должна быть в будущем")
     private LocalDateTime end;
-    @NotNull(message = "Вещь для бронирования обязательна")
-    private Item item;
-    @NotNull(message = "Пользователь,который осуществляет бронирование, должен быть указан")
-    private User booker;
     @NotNull(message = "Статус бронирования должен быть указан")
     private BookingStatus status;
+    @NotNull(message = "Пользователь,который осуществляет бронирование, должен быть указан")
+    private User booker;
+    @NotNull(message = "Вещь для бронирования обязательна")
+    private Item item;
+
 }
