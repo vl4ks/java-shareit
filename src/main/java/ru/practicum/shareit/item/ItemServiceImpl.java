@@ -3,6 +3,7 @@ package ru.practicum.shareit.item;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.BookingRepository;
 import ru.practicum.shareit.booking.BookingStatus;
 import ru.practicum.shareit.booking.model.Booking;
@@ -36,6 +37,7 @@ public class ItemServiceImpl implements ItemService {
     private final CommentRepository commentRepository;
 
     @Override
+    @Transactional(readOnly = true)
     public ItemDto getItem(Long itemId) {
         log.info("Получение вещи по id = {}", itemId);
         Item item = validateItemExists(itemId);
@@ -48,6 +50,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<ItemDto> getItemsWithBookings(Long ownerId) {
         log.info("Получение всех вещей владельца с id = {}", ownerId);
 
@@ -64,7 +67,7 @@ public class ItemServiceImpl implements ItemService {
         Map<Long, Booking> nextBookings = bookingRepository.findNextBookingsByOwner(ownerId, now)
                 .stream().collect(Collectors.toMap(b -> b.getItem().getId(), b -> b));
 
-        List<Comment> comments = commentRepository.findCommentsByOwnerId(ownerId);
+        List<Comment> comments = commentRepository.findByItem_Owner_Id(ownerId);
 
         Map<Long, List<CommentDto>> commentsByItemId = comments.stream()
                 .collect(Collectors.groupingBy(comment -> comment.getItem().getId(),
@@ -80,6 +83,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    @Transactional
     public ItemDto createItem(ItemDto itemDto, Long userId) {
         log.info("Создание новой вещи пользователем с id = {}", userId);
         User owner = validateUser(userId);
@@ -90,40 +94,32 @@ public class ItemServiceImpl implements ItemService {
 
 
     @Override
+    @Transactional
     public CommentDto addComment(Long itemId, Long userId, CommentCreateDto createCommentDto) {
         log.info("Добавление комментария для вещи с id = {} пользователем с id = {}", itemId, userId);
 
         Item item = validateItemExists(itemId);
         User user = validateUser(userId);
 
-        try {
-            Booking booking = bookingRepository
-                    .findByItemIdAndBookerIdAndStatusAndEndIsBefore(itemId, userId, BookingStatus.APPROVED, LocalDateTime.now())
-                    .stream()
-                    .findFirst()
-                    .orElseThrow(() -> new ValidationException("Бронирование не найдено или не завершено."));
+        Booking booking = bookingRepository
+                .findByItemIdAndBookerIdAndStatusAndEndIsBefore(itemId, userId, BookingStatus.APPROVED, LocalDateTime.now())
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new ValidationException("Бронирование не найдено или не завершено."));
 
-            log.info("Бронирование найдено: id = {}", booking.getId());
+        log.info("Бронирование найдено: id = {}", booking.getId());
 
-            Comment comment = new Comment();
-            comment.setText(createCommentDto.getText());
-            comment.setAuthor(user);
-            comment.setItem(item);
-            comment.setCreated(LocalDateTime.now());
+        Comment comment = toComment(createCommentDto, user, item, LocalDateTime.now());
 
-            Comment savedComment = commentRepository.save(comment);
+        Comment savedComment = commentRepository.save(comment);
 
-            return toCommentDto(savedComment);
+        return toCommentDto(savedComment);
 
-        } catch (ValidationException e) {
-            log.error("Нельзя добавить комментарий: {}", e.getMessage());
-            throw e;
-        }
     }
 
 
-
     @Override
+    @Transactional(readOnly = true)
     public List<ItemDto> searchItems(String text) {
         if (text == null || text.isBlank()) {
             return List.of();
@@ -135,6 +131,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    @Transactional
     public ItemDto updateItem(ItemDto itemDto, Long userId) {
         log.info("Обновление вещи с id = {} пользователем с id = {}", itemDto.getId(), userId);
 
@@ -154,6 +151,7 @@ public class ItemServiceImpl implements ItemService {
 
 
     @Override
+    @Transactional
     public void deleteItem(User user, Long itemId) {
         log.info("Удаление вещи с id = {} пользователем с id = {}", itemId, user.getId());
         Item item = validateItemExists(itemId);

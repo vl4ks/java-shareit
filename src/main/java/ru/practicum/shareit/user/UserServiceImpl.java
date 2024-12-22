@@ -3,6 +3,7 @@ package ru.practicum.shareit.user;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.exception.ConflictException;
 import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.exception.ValidationException;
@@ -21,12 +22,14 @@ public class UserServiceImpl implements UserService {
     private final UserRepository repository;
 
     @Override
+    @Transactional(readOnly = true)
     public List<UserDto> getAllUsers() {
         log.info("Получение всех пользователей");
         return repository.findAll().stream().map(UserMapper::toUserDto).toList();
     }
 
     @Override
+    @Transactional
     public UserDto createUser(UserDto userDto) {
         log.info("Создание нового пользователя: {}", userDto);
         User user = toUser(userDto);
@@ -44,6 +47,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public UserDto getUserById(Long id) {
         log.info("Получение пользователя по id = {}", id);
         User user = validateUserExists(id);
@@ -51,6 +55,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public UserDto updateUser(Long id, UserDto userDto) {
         log.info("Обновление пользователя {} на {}", id, userDto);
         User existingUser = validateUserExists(id);
@@ -70,6 +75,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public void deleteUser(Long id) {
         log.info("Удаление пользователя с id = {} ", id);
         validateUserExists(id);

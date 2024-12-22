@@ -2,6 +2,7 @@ package ru.practicum.shareit.booking;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingRequestDto;
 import ru.practicum.shareit.booking.model.Booking;
@@ -29,6 +30,7 @@ public class BookingServiceImpl implements BookingService {
     private final UserRepository userRepository;
 
     @Override
+    @Transactional
     public BookingDto createBooking(Long userId, BookingRequestDto bookingRequestDto) {
         User booker = findUserById(userId);
         Item item = findItemById(bookingRequestDto.getItemId());
@@ -42,15 +44,28 @@ public class BookingServiceImpl implements BookingService {
         }
 
         Booking booking = toBooking(bookingRequestDto, booker, item);
-        if (booking.getStart() == null || booking.getEnd() == null) {
-            throw new ValidationException("Начало и конец бронирования не могут быть пустыми.");
+        if (!booking.getStart().isBefore(booking.getEnd())) {
+            throw new ValidationException("Время начала бронирования должно быть раньше времени окончания.");
         }
+
+        boolean hasOverlap = bookingRepository.existsByItemIdAndStatusAndEndAfterAndStartBefore(
+                item.getId(),
+                BookingStatus.APPROVED,
+                booking.getStart(),
+                booking.getEnd()
+        );
+
+        if (hasOverlap) {
+            throw new ValidationException("Бронирование пересекается с уже существующим подтвержденным бронированием.");
+        }
+
         Booking savedBooking = bookingRepository.save(booking);
 
         return toBookingDto(savedBooking);
     }
 
     @Override
+    @Transactional
     public BookingDto updateBookingStatus(Long ownerId, Long bookingId, boolean approved) {
         Booking booking = findBookingById(bookingId);
 
@@ -69,6 +84,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public BookingDto getBookingById(Long userId, Long bookingId) {
         Booking booking = findBookingById(bookingId);
         validateBookingAccess(userId, booking);
@@ -76,6 +92,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<BookingDto> getBookingsByState(Long userId, BookingState state) {
         User user = findUserById(userId);
         return findBookings(userId, state).stream()
@@ -84,6 +101,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<BookingDto> getBookingsForOwner(Long ownerId, BookingState state) {
         findUserById(ownerId);
         List<Long> itemIds = itemRepository.findAllByOwnerId(ownerId).stream()
