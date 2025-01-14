@@ -5,7 +5,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.practicum.shareit.item.dto.CommentCreateDto;
+import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.user.model.User;
 
 import java.util.List;
 
@@ -21,7 +24,7 @@ public class ItemController {
     @GetMapping
     public ResponseEntity<List<ItemDto>> getItemsByOwnerId(@RequestHeader(HEADER_USER_ID) Long userId) {
         log.debug("Получение вещей владельца с id = {}", userId);
-        List<ItemDto> items = itemService.getItemsByOwnerId(userId);
+        List<ItemDto> items = itemService.getItemsWithBookings(userId);
         return ResponseEntity.ok(items);
     }
 
@@ -43,6 +46,15 @@ public class ItemController {
         return ResponseEntity.ok(createdItem);
     }
 
+    @PostMapping("/{itemId}/comment")
+    public ResponseEntity<CommentDto> addComment(@RequestHeader(HEADER_USER_ID) Long userId,
+                                                 @PathVariable Long itemId,
+                                                 @Valid @RequestBody CommentCreateDto commentDto) {
+        log.debug("Добавление комментария для вещи с id = {} пользователем с id = {}", itemId, userId);
+        CommentDto addedComment = itemService.addComment(itemId, userId, commentDto);
+        return ResponseEntity.ok(addedComment);
+    }
+
     @GetMapping("/search")
     public ResponseEntity<List<ItemDto>> search(@RequestParam String text) {
         log.debug("Поиск вещи по тексту: {}", text);
@@ -62,10 +74,10 @@ public class ItemController {
     }
 
     @DeleteMapping("/{itemId}")
-    public ResponseEntity<Void> delete(@RequestHeader(HEADER_USER_ID) Long userId,
+    public ResponseEntity<Void> delete(@RequestHeader(HEADER_USER_ID) User user,
                                        @PathVariable Long itemId) {
         log.debug("Удаление вещи с id = {} ", itemId);
-        itemService.deleteItem(userId, itemId);
+        itemService.deleteItem(user, itemId);
         return ResponseEntity.noContent().build();
     }
 }
