@@ -21,6 +21,7 @@ import ru.practicum.shareit.user.repository.UserRepository;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static ru.practicum.shareit.booking.service.BookingMapper.toBooking;
@@ -92,7 +93,7 @@ public class BookingServiceImpl implements BookingService {
                 approved
         );
         Booking booking = findBookingById(bookingId);
-        if (booking.getItem().getOwner().getId() != ownerId) {
+        if (!Objects.equals(booking.getItem().getOwner().getId(), ownerId)) {
             log.warn("Пользователь с id={} не является владельцем вещи для бронирования с id={}", ownerId, bookingId);
             throw new ValidationException("Только владелец может подтвердить или отклонить бронирование.");
         }
