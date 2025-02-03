@@ -45,6 +45,7 @@ class BookingControllerTest {
     private BookingDto bookingExpected;
     private Long userId;
     private Long bookingId;
+
     @BeforeEach
     public void testInit() {
         userId = 1L;

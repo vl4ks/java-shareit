@@ -22,6 +22,7 @@ public final class BookingMapper {
                 .item(item)
                 .build();
     }
+
     public static Booking toBooking(BookingRequestDto dto) {
         if (dto == null) {
             return null;
