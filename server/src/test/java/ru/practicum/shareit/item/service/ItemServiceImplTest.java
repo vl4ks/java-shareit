@@ -257,4 +257,5 @@ class ItemServiceImplTest {
         assertEquals(testComment.getText(), commentDto.getText());
         assertEquals(testComment.getAuthorName(), commentDto.getAuthorName());
     }
+
 }

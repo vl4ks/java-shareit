@@ -38,4 +38,5 @@ public class UserClient extends BaseClient {
     private String getPath(Long userId) {
         return "/" + userId.toString();
     }
+
 }

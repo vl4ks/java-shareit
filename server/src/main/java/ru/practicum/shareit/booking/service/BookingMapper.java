@@ -43,4 +43,5 @@ public final class BookingMapper {
                 .item(ItemMapper.toItemDto(booking.getItem()))
                 .build();
     }
+
 }

@@ -99,4 +99,5 @@ class BookingTest {
         booking.setStatus(BookingStatus.REJECTED);
         assertEquals(BookingStatus.REJECTED, booking.getStatus());
     }
+
 }

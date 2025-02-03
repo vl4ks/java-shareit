@@ -18,4 +18,5 @@ public final class UserMapper {
     public static User toUser(UserSaveDto userSaveDto) {
         return new User(null, userSaveDto.getName(), userSaveDto.getEmail());
     }
+
 }

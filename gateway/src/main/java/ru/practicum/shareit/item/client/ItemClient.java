@@ -52,4 +52,5 @@ public class ItemClient extends BaseClient {
     public ResponseEntity<Object> searchItems(String text) {
         return get(SEARCH_PATH + text);
     }
+
 }

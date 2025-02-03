@@ -75,4 +75,5 @@ public class UserServiceImpl implements UserService {
         return repository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("Пользователь с id = " + userId + " не найден"));
     }
+
 }

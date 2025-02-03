@@ -115,4 +115,5 @@ public class UserServiceImplTest {
 
         Mockito.verify(userRepository).deleteById(1L);
     }
+
 }

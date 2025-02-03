@@ -66,4 +66,5 @@ public class BookingController {
 		return BookingState.from(state)
 				.orElseThrow(() -> new ValidationException("State имеет неизвестное значение."));
 	}
+
 }

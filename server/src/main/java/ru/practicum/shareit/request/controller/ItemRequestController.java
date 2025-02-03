@@ -40,4 +40,5 @@ public class ItemRequestController {
         log.info("Получение данных об одном конкретном запросе по requestId = {}", requestId);
         return itemRequestService.getItemRequest(requestId);
     }
+
 }

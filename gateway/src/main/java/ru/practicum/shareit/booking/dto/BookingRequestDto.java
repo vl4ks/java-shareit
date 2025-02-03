@@ -17,4 +17,5 @@ public class BookingRequestDto {
 	@FutureOrPresent
 	private LocalDateTime start;
 	private LocalDateTime end;
+
 }

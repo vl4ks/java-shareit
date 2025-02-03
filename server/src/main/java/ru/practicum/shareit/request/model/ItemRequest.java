@@ -42,4 +42,5 @@ public class ItemRequest {
         this.requester = user;
         this.created = created;
     }
+
 }

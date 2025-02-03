@@ -22,4 +22,5 @@ public interface ItemService {
     void deleteItem(User user, Long itemId);
 
     List<ItemDto> getItemsWithBookings(Long ownerId);
+
 }

@@ -7,4 +7,5 @@ public enum BookingState {
     PAST,
     FUTURE,
     ALL;
+
 }

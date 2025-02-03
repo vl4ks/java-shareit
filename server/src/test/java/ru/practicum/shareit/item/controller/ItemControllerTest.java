@@ -181,4 +181,5 @@ public class ItemControllerTest {
 
         verify(itemService, times(1)).searchItems(eq(searchText));
     }
+
 }

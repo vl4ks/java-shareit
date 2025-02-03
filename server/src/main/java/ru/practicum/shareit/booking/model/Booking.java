@@ -40,4 +40,5 @@ public class Booking {
     @Enumerated(value = EnumType.STRING)
     @Column(length = 10)
     private BookingStatus status;
+
 }

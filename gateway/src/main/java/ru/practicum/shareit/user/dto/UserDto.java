@@ -16,4 +16,5 @@ public class UserDto {
     @NotBlank(message = "Адрес электронной почты должен быть указан")
     @Email
     private String email;
+
 }

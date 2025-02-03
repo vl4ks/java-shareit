@@ -62,4 +62,5 @@ public class ItemController {
     public ResponseEntity<Object> searchItems(@RequestParam @NotBlank String text) {
         return text.isBlank() ? ResponseEntity.ok(List.of()) : itemClient.searchItems(text);
     }
+
 }

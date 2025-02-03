@@ -11,5 +11,4 @@ class ShareItServerTests {
     @Test
     void contextLoads() {
     }
-
 }

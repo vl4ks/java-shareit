@@ -41,4 +41,5 @@ public class UserController {
         userClient.deleteUser(userId);
         return new ResponseEntity<Object>(HttpStatus.OK);
     }
+
 }

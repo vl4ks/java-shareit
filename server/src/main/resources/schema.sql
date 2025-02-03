@@ -43,3 +43,4 @@ CREATE TABLE IF NOT EXISTS comments (
     author_id int NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     created timestamp without time zone
 );
+

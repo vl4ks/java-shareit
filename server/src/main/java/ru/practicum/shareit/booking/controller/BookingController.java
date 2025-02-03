@@ -50,4 +50,5 @@ public class BookingController {
                                                 @RequestParam(defaultValue = "ALL") BookingState state) {
         return bookingService.getBookingsForOwner(ownerId, state);
     }
+
 }

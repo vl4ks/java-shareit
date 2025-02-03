@@ -55,4 +55,5 @@ public class BookingClient extends BaseClient {
         Map<String, Object> uriVariables = Map.of("state", state.name());
         return get(ALL_USER_ITEMS_BOOKINGS_PATH, userId, uriVariables);
     }
+
 }

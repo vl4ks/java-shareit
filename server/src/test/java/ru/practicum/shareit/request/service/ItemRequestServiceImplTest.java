@@ -136,4 +136,5 @@ class ItemRequestServiceImplTest {
         Mockito.verify(userRepository).findById(user.getId());
         Mockito.verify(itemRequestRepository).save(Mockito.any(ItemRequest.class));
     }
+
 }

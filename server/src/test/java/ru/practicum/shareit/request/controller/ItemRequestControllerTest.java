@@ -118,4 +118,5 @@ class ItemRequestControllerTest {
 
         verify(service, times(1)).getAllItemRequests(userId);
     }
+
 }

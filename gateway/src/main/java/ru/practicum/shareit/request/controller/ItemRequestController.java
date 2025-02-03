@@ -40,7 +40,7 @@ public class ItemRequestController {
 
     @GetMapping("/{requestId}")
     public ResponseEntity<Object> getItemRequest(@PathVariable @PositiveOrZero Long requestId) {
-        log.info("Получение данных о запросе .");
+        log.info("Получение данных о запросе.");
         return itemRequestClient.getItemRequest(requestId);
     }
 }

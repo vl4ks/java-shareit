@@ -23,4 +23,5 @@ public class UserSaveDto {
     @Size(min = 1, max = 150, message = "Email должен содержать от 1 до 150 символов.", groups = {ValidationGroups.Create.class,
             ValidationGroups.Update.class})
     private String email;
+
 }

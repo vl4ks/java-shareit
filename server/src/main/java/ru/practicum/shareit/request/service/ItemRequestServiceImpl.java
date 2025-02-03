@@ -67,4 +67,5 @@ public class ItemRequestServiceImpl implements ItemRequestService {
         log.info("Найден запрос {}", itemRequestDto);
         return itemRequestDto;
     }
+
 }

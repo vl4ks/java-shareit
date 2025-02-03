@@ -214,4 +214,5 @@ public class BookingServiceImpl implements BookingService {
             throw new ForbiddenException("У пользователя нет доступа к бронированию.");
         }
     }
+
 }

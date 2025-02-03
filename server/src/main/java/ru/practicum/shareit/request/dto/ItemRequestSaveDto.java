@@ -15,4 +15,5 @@ public class ItemRequestSaveDto {
     @NotBlank
     @Size(min = 1, max = 400)
     private String description;
+
 }

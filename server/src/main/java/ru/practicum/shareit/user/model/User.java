@@ -22,4 +22,5 @@ public class User {
 
     @Column(name = "email", length = 150)
     private String email;
+
 }

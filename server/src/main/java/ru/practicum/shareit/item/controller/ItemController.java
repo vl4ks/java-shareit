@@ -70,4 +70,5 @@ public class ItemController {
         log.debug("Удаление вещи с id = {} ", itemId);
         itemService.deleteItem(user, itemId);
     }
+
 }

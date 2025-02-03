@@ -85,4 +85,5 @@ class ExceptionResolverTest {
             throw new RuntimeException("Произошла непредвиденная ошибка.");
         }
     }
+
 }

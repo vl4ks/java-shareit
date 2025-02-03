@@ -170,4 +170,5 @@ class BookingControllerTest {
 
         verify(service, times(1)).getBookingsForOwner(eq(userId), eq(state));
     }
+
 }

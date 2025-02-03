@@ -288,4 +288,5 @@ class BookingServiceImplTest {
         Mockito.verify(itemRepository).findAllByOwnerId(user1.getId());
         Mockito.verifyNoInteractions(bookingRepository);
     }
+
 }

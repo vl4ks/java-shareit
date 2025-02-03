@@ -119,4 +119,5 @@ class UserControllerTest {
 
         verify(service, times(1)).deleteUser(eq(userId));
     }
+
 }
