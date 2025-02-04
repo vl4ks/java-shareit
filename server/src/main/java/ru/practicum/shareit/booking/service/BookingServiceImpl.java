@@ -184,13 +184,13 @@ public class BookingServiceImpl implements BookingService {
         }
     }
 
-        private User findUserById (Long userId){
-            return userRepository.findById(userId)
-                    .orElseThrow(() -> new NotFoundException("Пользователь с id " + userId + " не найден."));
-        }
-
-        private Booking findBookingById (Long bookingId){
-            return bookingRepository.findById(bookingId)
-                    .orElseThrow(() -> new NotFoundException("Бронирование с id " + bookingId + " не найдено."));
-        }
+    private User findUserById(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("Пользователь с id " + userId + " не найден."));
     }
+
+    private Booking findBookingById(Long bookingId) {
+        return bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new NotFoundException("Бронирование с id " + bookingId + " не найдено."));
+    }
+}
