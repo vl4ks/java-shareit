@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item.service;
 
 import org.junit.jupiter.api.Test;
+import ru.practicum.shareit.exception.NotFoundException;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.CommentSaveDto;
 import ru.practicum.shareit.item.dto.ItemDto;
@@ -103,6 +104,44 @@ class ItemServiceImplTest {
             .build();
 
     @Test
+    void testGetItem_Success() {
+        Long itemId = item.getId();
+        Comment comment2 = Comment.builder()
+                .id(2L)
+                .text("Text2")
+                .item(item)
+                .author(user)
+                .build();
+        List<Comment> comments = List.of(comment, comment2);
+
+        Mockito.when(itemRepository.findById(itemId)).thenReturn(Optional.of(item));
+        Mockito.when(commentRepository.findAllByItemId(itemId)).thenReturn(comments);
+
+        ItemDto result = itemService.getItem(itemId);
+
+        assertNotNull(result);
+        assertEquals(itemId, result.getId());
+        assertEquals("ItemName", result.getName());
+        assertEquals(2, result.getComments().size());
+        assertEquals("Text", result.getComments().getFirst().getText());
+
+        Mockito.verify(itemRepository).findById(itemId);
+        Mockito.verify(commentRepository).findAllByItemId(itemId);
+    }
+
+    @Test
+    void testGetItem_ItemNotFound() {
+        Long itemId = 2L;
+
+        Mockito.when(itemRepository.findById(itemId)).thenReturn(Optional.empty());
+
+        assertThrows(NotFoundException.class, () -> itemService.getItem(itemId));
+
+        Mockito.verify(itemRepository).findById(itemId);
+        Mockito.verify(commentRepository, Mockito.never()).findAllByItemId(anyLong());
+    }
+
+    @Test
     void testGetItemsWithBookings_ReturnItemsWithBookingsAndComments() {
         Long ownerId = 1L;
         List<Item> items = List.of(item);
@@ -122,8 +161,8 @@ class ItemServiceImplTest {
                 .name(item.getName())
                 .description(item.getDescription())
                 .available(item.getAvailable())
-                .lastBooking(lastBookings.get(0).getStart())
-                .nextBooking(nextBookings.get(0).getStart())
+                .lastBooking(lastBookings.getFirst().getStart())
+                .nextBooking(nextBookings.getFirst().getStart())
                 .comments(List.of(new CommentDto(1L, "Text", "User", null)))
                 .build();
 
@@ -131,7 +170,7 @@ class ItemServiceImplTest {
 
         assertFalse(actualItems.isEmpty());
         assertEquals(1, actualItems.size());
-        assertEquals(expectedItemDto, actualItems.get(0));
+        assertEquals(expectedItemDto, actualItems.getFirst());
 
         Mockito.verify(itemRepository).findAllByOwnerId(ownerId);
         Mockito.verify(bookingRepository).findLastBookingsByOwner(eq(ownerId), any(LocalDateTime.class));

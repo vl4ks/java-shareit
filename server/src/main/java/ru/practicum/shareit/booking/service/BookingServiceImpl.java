@@ -45,7 +45,9 @@ public class BookingServiceImpl implements BookingService {
         );
 
         User booker = findUserById(userId);
-        Item item = findItemById(bookingRequestDto.getItemId());
+        Long itemId = bookingRequestDto.getItemId();
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new NotFoundException("Вещь с id " + itemId + " не найдена."));
 
         if (item.getOwner().getId().equals(userId)) {
             log.warn("Пользователь с id={} пытается забронировать свою собственную вещь с id={}", userId, item.getId());
@@ -107,7 +109,10 @@ public class BookingServiceImpl implements BookingService {
     public BookingDto getBookingById(Long userId, Long bookingId) {
         log.info("Запрос информации о бронировании: bookingId={}, userId={}", bookingId, userId);
         Booking booking = findBookingById(bookingId);
-        validateBookingAccess(userId, booking);
+        if (!booking.getBooker().getId().equals(userId) &&
+                !booking.getItem().getOwner().getId().equals(userId)) {
+            throw new ForbiddenException("У пользователя нет доступа к бронированию.");
+        }
         log.info("Информация о бронировании успешно получена: bookingId={}", bookingId);
         return toBookingDto(booking);
     }
@@ -141,25 +146,18 @@ public class BookingServiceImpl implements BookingService {
 
         switch (state) {
             case CURRENT:
-                log.debug("Поиск текущих бронирований для userId={}", userId);
                 return bookingRepository.findCurrentBookingsByBooker(userId, now);
             case PAST:
-                log.debug("Поиск завершенных бронирований для userId={}", userId);
                 return bookingRepository.findAllByBookerIdAndEndBeforeOrderByStartDesc(userId, now);
             case FUTURE:
-                log.debug("Поиск будущих бронирований для userId={}", userId);
                 return bookingRepository.findAllByBookerIdAndStartAfterOrderByStartDesc(userId, now);
             case WAITING:
-                log.debug("Поиск ожидающих бронирований для userId={}", userId);
                 return bookingRepository.findAllByBookerIdAndStatusOrderByStartDesc(userId, BookingStatus.WAITING);
             case REJECTED:
-                log.debug("Поиск отклоненных бронирований для userId={}", userId);
                 return bookingRepository.findBookingsByBookerAndStatus(userId, BookingStatus.REJECTED);
             case ALL:
-                log.debug("Поиск всех бронирований для userId={}", userId);
                 return bookingRepository.findAllByBookerIdOrderByStartDesc(userId);
             default:
-                log.error("Неизвестное состояние бронирования: state={}", state);
                 throw new IllegalArgumentException("Неизвестное состояние бронирования: " + state);
         }
     }
@@ -170,49 +168,29 @@ public class BookingServiceImpl implements BookingService {
 
         switch (state) {
             case CURRENT:
-                log.debug("Поиск текущих бронирований для владельца: itemIds={}", itemIds);
                 return bookingRepository.findCurrentBookingsByOwner(itemIds, now);
             case PAST:
-                log.debug("Поиск завершенных бронирований для владельца: itemIds={}", itemIds);
                 return bookingRepository.findAllByItemIdInAndEndBeforeOrderByStartDesc(itemIds, now);
             case FUTURE:
-                log.debug("Поиск будущих бронирований для владельца: itemIds={}", itemIds);
                 return bookingRepository.findAllByItemIdInAndStartAfterOrderByStartDesc(itemIds, now);
             case WAITING:
-                log.debug("Поиск ожидающих бронирований для владельца: itemIds={}", itemIds);
                 return bookingRepository.findAllByItemIdInAndStatusOrderByStartDesc(itemIds, BookingStatus.WAITING);
             case REJECTED:
-                log.debug("Поиск отклоненных бронирований для владельца: itemIds={}", itemIds);
                 return bookingRepository.findAllByItemIdInAndStatusOrderByStartDesc(itemIds, BookingStatus.REJECTED);
             case ALL:
-                log.debug("Поиск всех бронирований для владельца: itemIds={}", itemIds);
                 return bookingRepository.findAllByItemIdInOrderByStartDesc(itemIds);
             default:
-                log.error("Неизвестное состояние бронирования: state={}", state);
                 throw new IllegalArgumentException("Неизвестное состояние бронирования: " + state);
         }
     }
 
+        private User findUserById (Long userId){
+            return userRepository.findById(userId)
+                    .orElseThrow(() -> new NotFoundException("Пользователь с id " + userId + " не найден."));
+        }
 
-    private User findUserById(Long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("Пользователь с id " + userId + " не найден."));
-    }
-
-    private Item findItemById(Long itemId) {
-        return itemRepository.findById(itemId)
-                .orElseThrow(() -> new NotFoundException("Вещь с id " + itemId + " не найдена."));
-    }
-
-    private Booking findBookingById(Long bookingId) {
-        return bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new NotFoundException("Бронирование с id " + bookingId + " не найдено."));
-    }
-
-    private void validateBookingAccess(Long userId, Booking booking) {
-        if (!booking.getBooker().getId().equals(userId) &&
-                !booking.getItem().getOwner().getId().equals(userId)) {
-            throw new ForbiddenException("У пользователя нет доступа к бронированию.");
+        private Booking findBookingById (Long bookingId){
+            return bookingRepository.findById(bookingId)
+                    .orElseThrow(() -> new NotFoundException("Бронирование с id " + bookingId + " не найдено."));
         }
     }
-}

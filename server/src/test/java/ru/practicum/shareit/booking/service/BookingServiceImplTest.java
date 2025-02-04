@@ -34,6 +34,9 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.*;
+
 @MockitoSettings(strictness = Strictness.LENIENT)
 @ExtendWith(MockitoExtension.class)
 class BookingServiceImplTest {
@@ -107,9 +110,8 @@ class BookingServiceImplTest {
         Mockito.when(userRepository.findById(user1.getId())).thenReturn(Optional.of(user1));
         Mockito.when(itemRepository.findById(item1.getId())).thenReturn(Optional.of(item1));
 
-        ValidationException exception = assertThrows(ValidationException.class, () -> {
-            bookingService.createBooking(user1.getId(), bookingRequestDto);
-        });
+        ValidationException exception = assertThrows(ValidationException.class, () ->
+                bookingService.createBooking(user1.getId(), bookingRequestDto));
 
         assertEquals("Нельзя забронировать свою собственную вещь.", exception.getMessage());
     }
@@ -122,9 +124,8 @@ class BookingServiceImplTest {
         Mockito.when(userRepository.findById(user2.getId())).thenReturn(Optional.of(user2));
         Mockito.when(itemRepository.findById(item2.getId())).thenReturn(Optional.of(item2));
 
-        ValidationException exception = assertThrows(ValidationException.class, () -> {
-            bookingService.createBooking(user2.getId(), bookingRequestDto);
-        });
+        ValidationException exception = assertThrows(ValidationException.class, () ->
+                bookingService.createBooking(user2.getId(), bookingRequestDto));
 
         assertEquals("Вещь недоступна для бронирования.", exception.getMessage());
     }
@@ -137,9 +138,8 @@ class BookingServiceImplTest {
         Mockito.when(userRepository.findById(user2.getId())).thenReturn(Optional.of(user2));
         Mockito.when(itemRepository.findById(item1.getId())).thenReturn(Optional.of(item1));
 
-        ValidationException exception = assertThrows(ValidationException.class, () -> {
-            bookingService.createBooking(user2.getId(), bookingRequestDto);
-        });
+        ValidationException exception = assertThrows(ValidationException.class, () ->
+                bookingService.createBooking(user2.getId(), bookingRequestDto));
 
         assertEquals("Время начала бронирования должно быть раньше времени окончания.", exception.getMessage());
     }
@@ -153,9 +153,8 @@ class BookingServiceImplTest {
         Mockito.when(bookingRepository.existsByItemIdAndStatusAndEndAfterAndStartBefore(item1.getId(), BookingStatus.APPROVED, bookingRequestDto.getStart(), bookingRequestDto.getEnd()))
                 .thenReturn(true);
 
-        ValidationException exception = assertThrows(ValidationException.class, () -> {
-            bookingService.createBooking(user2.getId(), bookingRequestDto);
-        });
+        ValidationException exception = assertThrows(ValidationException.class, () ->
+                bookingService.createBooking(user2.getId(), bookingRequestDto));
 
         assertEquals("Бронирование пересекается с уже существующим подтвержденным бронированием.", exception.getMessage());
     }
@@ -194,7 +193,7 @@ class BookingServiceImplTest {
     void testUpdateBookingStatus_ThrowNotFoundException_whenBookingNotFound() {
         Mockito.when(bookingRepository.findById(Mockito.anyLong())).thenReturn(Optional.empty());
 
-        NotFoundException exception = assertThrows(
+        assertThrows(
                 NotFoundException.class,
                 () -> bookingService.updateBookingStatus(item1.getOwner().getId(), 99L, true)
         );
@@ -287,5 +286,65 @@ class BookingServiceImplTest {
         Mockito.verify(userRepository).findById(user1.getId());
         Mockito.verify(itemRepository).findAllByOwnerId(user1.getId());
         Mockito.verifyNoInteractions(bookingRepository);
+    }
+
+    @Test
+    void testReturnBookingWhenExists() {
+        Booking booking = new Booking(1L, LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2), item1, user1, BookingStatus.WAITING);
+        Mockito.when(bookingRepository.findById(Mockito.anyLong())).thenReturn(Optional.of(booking));
+        BookingDto result = bookingService.getBookingById(booking.getBooker().getId(), booking.getId());
+        assertNotNull(result);
+    }
+
+    @Test
+    void testThrowExceptionWhenBookingNotFound() {
+        Booking booking = new Booking(1L, LocalDateTime.now().plusDays(1), LocalDateTime.now().plusDays(2), item1, user1, BookingStatus.WAITING);
+
+        Mockito.when(bookingRepository.findById(Mockito.anyLong())).thenReturn(Optional.empty());
+        assertThrows(NotFoundException.class, () -> bookingService.getBookingById(booking.getBooker().getId(), booking.getId()));
+    }
+
+    @Test
+    void testGetAllUserBookingsWaiting() {
+        Long userId = 20L;
+        BookingState state = BookingState.WAITING;
+
+        List<BookingDto> bookings = bookingService.getBookingsByState(userId, state);
+        bookings.forEach(booking -> assertThat(booking, allOf(
+                hasProperty("booker", allOf(
+                        hasProperty("id", equalTo(userId))
+                )),
+                hasProperty("status", notNullValue())))
+        );
+    }
+
+    @Test
+    void testGetAllUserBookingsRejected() {
+        Long userId = 20L;
+        BookingState state = BookingState.REJECTED;
+
+        List<BookingDto> bookings = bookingService.getBookingsByState(userId, state);
+
+        bookings.forEach(booking -> assertThat(booking, allOf(
+                hasProperty("booker", allOf(
+                        hasProperty("id", equalTo(userId))
+                )),
+                hasProperty("status", notNullValue()))
+        ));
+    }
+
+    @Test
+    void testGetAllUserBookingsCurrent() {
+        Long userId = 20L;
+        BookingState state = BookingState.CURRENT;
+
+        List<BookingDto> bookings = bookingService.getBookingsByState(userId, state);
+
+        bookings.forEach(booking -> assertThat(booking, allOf(
+                hasProperty("booker", allOf(
+                        hasProperty("id", equalTo(userId))
+                )),
+                hasProperty("status", notNullValue()))
+        ));
     }
 }
